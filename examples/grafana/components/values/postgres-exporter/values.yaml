@@ -1,0 +1,28 @@
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-postgres-exporter
+
+# Configure database connection to RDS exampledb
+config:
+  datasource:
+    host: "{{ .nuon.components.rds_cluster_exampledb.outputs.address }}"
+    port: "5432"
+    database: exampledb
+    user: exampledb
+    passwordSecret:
+      name: exampledb-secret
+      key: password
+    sslmode: disable
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 9187
+
+# Resource limits
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi

@@ -1,0 +1,96 @@
+# inputs
+
+[[group]]
+name         = "grafana"
+description  = "Env vars https://github.com/grafana/grafana/releases"
+display_name = "Grafana Configuration"
+
+[[input]]
+name         = "grafana_release"
+description  = "The version of Grafana to deploy"
+default      = "12.1.0"
+display_name = "Grafana Release Version"
+group        = "grafana"
+
+[[input]]
+name         = "enterprise_license_key"
+description  = "Grafana Enterprise license key (optional - leave blank for OSS)"
+default      = ""
+display_name = "Enterprise License Key"
+group        = "grafana"
+
+[[input]]
+name         = "admin_user"
+description  = "Grafana admin username for login"
+default      = "admin"
+display_name = "Admin Username"
+required     = true
+group        = "grafana"
+
+[[input]]
+name         = "admin_password"
+description  = "Grafana admin password for login"
+default      = "admin"
+display_name = "Admin Password"
+required     = true
+sensitive    = true
+group        = "grafana"
+
+[[group]]
+name         = "database"
+description  = "RDS PostgreSQL database configuration https://aws.amazon.com/rds/instance-types/"
+display_name = "Database Configuration"
+
+[[input]]
+name         = "grafana_db_instance_type"
+description  = "RDS instance type for Grafana database"
+default      = "db.t4g.micro"
+display_name = "Grafana DB Instance Type"
+group        = "database"
+
+[[input]]
+name         = "exampledb_instance_type"
+description  = "RDS instance type for ExampleDB database"
+default      = "db.t4g.micro"
+display_name = "ExampleDB Instance Type"
+group        = "database"
+
+[[group]]
+name         = "compute"
+description  = "Kubernetes node configuration for the EKS cluster. https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html"
+display_name = "Kubernetes Nodes"
+
+[[input]]
+name         = "kubernetes_version"
+description  = "EKS Kubernetes version"
+default      = "1.33"
+display_name = "Kubernetes Version"
+group        = "compute"
+
+[[input]]
+name         = "instance_type"
+description  = "The AWS instance size to use for each node in the EKS cluster"
+default      = "t3a.medium"
+display_name = "Node Instance Size"
+group        = "compute"
+
+[[input]]
+name         = "min_size"
+description  = "Minimum number of nodes to provision in the EKS cluster"
+default      = "3"
+display_name = "Minimum Node Count"
+group        = "compute"
+
+[[input]]
+name         = "max_size"
+description  = "Maximum number of nodes to provision in the EKS cluster"
+default      = "5"
+display_name = "Maximum Node Count"
+group        = "compute"
+
+[[input]]
+name         = "desired_size"
+description  = "Desired number of nodes to provision in the EKS cluster"
+default      = "3"
+display_name = "Desired Node Count"
+group        = "compute"

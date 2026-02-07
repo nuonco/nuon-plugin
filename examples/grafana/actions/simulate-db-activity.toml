@@ -1,0 +1,23 @@
+# action
+
+name    = "simulate_db_activity"
+timeout = "30m"
+
+[[triggers]]
+type = "manual"
+
+[[steps]]
+name    = "create sample data and run fluctuating load"
+command = "./db_activity/simulate.sh"
+
+[steps.public_repo]
+repo      = "nuonco/example-app-configs"
+directory = "grafana/src/actions"
+branch    = "main"
+
+[steps.env_vars]
+DB_HOST     = "{{ .nuon.components.rds_cluster_exampledb.outputs.address }}"
+DB_PORT     = "{{ .nuon.components.rds_cluster_exampledb.outputs.db_instance_port }}"
+DB_NAME     = "{{ .nuon.components.rds_cluster_exampledb.outputs.db_instance_name }}"
+SECRET_ARN  = "{{ .nuon.components.rds_cluster_exampledb.outputs.db_instance_master_user_secret_arn }}"
+REGION      = "{{ .nuon.install_stack.outputs.region }}"

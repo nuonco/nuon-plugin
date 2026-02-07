@@ -1,0 +1,13 @@
+{
+  "name": "nuon",
+  "version": "0.1.0",
+  "description": "Create Nuon BYOC app configurations with AI-guided assistance",
+  "author": {
+    "name": "Nuon",
+    "url": "https://nuon.co"
+  },
+  "homepage": "https://docs.nuon.co",
+  "repository": "https://github.com/nuonco/nuon-plugin",
+  "license": "Apache-2.0",
+  "keywords": ["nuon", "byoc", "infrastructure", "deployment", "helm", "terraform"]
+}

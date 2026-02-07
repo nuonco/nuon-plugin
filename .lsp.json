@@ -1,0 +1,10 @@
+{
+  "nuon-toml": {
+    "command": "nuon-lsp",
+    "extensionToLanguage": {
+      ".toml": "toml"
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 3
+  }
+}

@@ -1,0 +1,15 @@
+# helm
+name           = "postgres_exporter"
+type           = "helm_chart"
+chart_name     = "prometheus-postgres-exporter"
+namespace      = "exampledb"
+storage_driver = "configmap"
+dependencies   = ["rds_cluster_exampledb"]
+
+[public_repo]
+repo      = "prometheus-community/helm-charts"
+directory = "charts/prometheus-postgres-exporter"
+branch    = "main"
+
+[[values_file]]
+contents = "./values/postgres-exporter/values.yaml"
