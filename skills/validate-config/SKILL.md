@@ -50,18 +50,21 @@ Read `reference/templating.md` and check all `{{ }}` expressions:
 - Permissions should define all three roles (provision, maintenance, deprovision)
 - Break glass config should exist
 
-## Step 6: CLI Validation (Optional)
+## Step 6: CLI Validation
 
-If the Nuon CLI is installed, suggest running:
+Run the Nuon CLI check script to see if nuon is installed:
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-nuon-cli.sh
+```
+
+If installed, run validation in the app config directory:
 ```bash
 nuon apps validate
 ```
 
-If not installed, mention:
-```
-Install the Nuon CLI for deeper validation:
-  brew install nuonco/tap/nuon
-```
+- If validation passes, note "CLI validation passed" in your report.
+- If validation returns errors, add them to the **Errors** section of your report, attempt to fix the issues, and re-run `nuon apps validate` until it passes or you cannot resolve the remaining errors.
+- If the CLI is not installed, skip this step and add an info note: "Install Nuon CLI for authoritative validation: brew install nuonco/tap/nuon"
 
 ## Report Format
 
