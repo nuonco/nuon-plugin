@@ -12,7 +12,7 @@ A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that make
 ## Requirements
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) v2.1+
-- [Nuon CLI](https://docs.nuon.co) (optional, enables `nuon apps validate` feedback loop)
+- [Nuon CLI](https://docs.nuon.co) (strongly recommended, enables `nuon apps validate` feedback loop)
 
 Install the Nuon CLI:
 ```bash
