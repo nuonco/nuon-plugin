@@ -64,6 +64,7 @@ nuon apps validate
 
 - If validation passes, note "CLI validation passed" in your report.
 - If validation returns errors, add them to the **Errors** section of your report, attempt to fix the issues, and re-run `nuon apps validate` until it passes or you cannot resolve the remaining errors.
+- If validation returns "app not found": this means the app has not been created in the Nuon control plane yet. This is NOT a config error — report it in the **Info** section and offer to create the app by asking the user if they'd like to run `nuon apps create --name=<dir-name>` (where dir-name is the current directory name, since app name must match directory name). If they accept, create the app and re-run `nuon apps validate`.
 - If the CLI is not installed, skip this step and add an info note: "Install Nuon CLI for authoritative validation: brew install nuonco/tap/nuon"
 
 ## Report Format
