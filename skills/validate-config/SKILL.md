@@ -24,6 +24,8 @@ Read `reference/schema.md` and check each file against its schema:
 - **runner.toml**: Needs `runner_type` (aws/azure)
 - **stack.toml**: Needs `type` (aws-cloudformation/azure-bicep/nested), `name`
 - **Components**: Each needs `name`, `type`, type-specific fields. Check `type` is one of: helm_chart, terraform_module, docker_build, container_image, kubernetes_manifest, job
+- **Repo configs**: Only one of `[public_repo]`, `[connected_repo]`, or `[helm_repo]` may be defined per component/sandbox (they are mutually exclusive)
+- **Version fields**: `terraform_version` and similar version fields must be quoted strings (e.g., `"1.5.0"` not `1.5.0` — unquoted dotted numbers are invalid TOML)
 
 ## Step 3: Template Validation
 

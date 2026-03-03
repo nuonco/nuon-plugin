@@ -59,7 +59,7 @@ my-app/
 
 Nuon TOML files use a **flat structure** at the top level. NO nested wrappers like `[component]`. The first line MUST be a type comment for the LSP.
 
-Valid first-line comments: `# helm`, `# terraform`, `# docker-build`, `# container-image`, `# kubernetes-manifest`, `# job`, `# inputs`, `# sandbox`, `# runner`, `# stack`, `# action`, `# metadata`, `# secrets`, `# permissions`, `# policies`
+Valid first-line comments: `# helm`, `# terraform`, `# docker-build`, `# container-image`, `# kubernetes-manifest`, `# job`, `# inputs`, `# input`, `# input-group`, `# sandbox`, `# runner`, `# stack`, `# action`, `# metadata`, `# secrets`, `# secret`, `# permissions`, `# policies`, `# policy`, `# installer`, `# install`, `# break-glass`
 
 **Example helm_chart component** (CORRECT format):
 ```toml
@@ -161,7 +161,7 @@ Rules of thumb:
 
 ## IMPORTANT: App Name = Directory Name
 
-When syncing a Nuon app config, the **directory name must match the app name**. `nuon apps sync` uses the current directory name to find the app. If you create a directory called `mattermost-app/`, the app must be created with `nuon apps create --name=mattermost-app`. If the app is named `mattermost`, the directory must be named `mattermost/`.
+When syncing a Nuon app config, the **directory name must match the app name**. `nuon sync` uses the current directory name to find the app. If you create a directory called `mattermost-app/`, the app must be created with `nuon apps create --name=mattermost-app`. If the app is named `mattermost`, the directory must be named `mattermost/`.
 
 When generating configs, always ensure consistency:
 - If the user specifies an app name, create the directory with that exact name
@@ -186,11 +186,28 @@ nuon orgs select
 # Create app
 nuon apps create --name=my-app
 
-# Sync config
-nuon apps sync
+# Sync config (top-level shorthand — preferred)
+nuon sync
+
+# Validate config locally
+nuon apps validate
+
+# Dev workflow (sync + build + deploy in one step)
+nuon dev
 
 # Check builds
 nuon builds list -c component_name
+
+# Scaffold a new config with the CLI (alternative to plugin-guided generation)
+nuon apps init --interactive
+# Or with a prebuilt template:
+nuon apps init --prebuild-template aws-eks
+
+# Manage app variables (replaces `nuon secrets`)
+nuon apps variables list
+nuon apps variables create --name=my_var --value=my_value
 ```
+
+Note: `nuon apps sync` still works but is deprecated in favor of `nuon sync`. Similarly, `nuon secrets` is deprecated in favor of `nuon apps variables`.
 
 If the user doesn't have the CLI installed, suggest they install it but note that config creation works without it.
