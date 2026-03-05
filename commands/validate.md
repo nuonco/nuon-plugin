@@ -24,7 +24,7 @@ Find and read all Nuon config files (.toml, values/*.yaml) in the current direct
 
 Read `reference/schema.md` for the complete field reference.
 
-If the Nuon CLI is available, also run `nuon apps validate` for server-side validation. If not installed, suggest:
+If the Nuon CLI is available, also run `nuon apps validate` for local directory validation. If not installed, suggest:
 ```
 brew install nuonco/tap/nuon
 ```

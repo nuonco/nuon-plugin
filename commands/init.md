@@ -25,10 +25,12 @@ Based on answers, read from the plugin's `reference/` and `examples/` directorie
 
 Create all files: metadata.toml, inputs.toml, sandbox.toml, runner.toml, stack.toml, components/, permissions/, break_glass.toml, and a README.md.
 
-IMPORTANT: The directory name MUST match the app name. `nuon apps sync` uses the directory name to find the app. Always ensure the directory name and `nuon apps create --name=` use the exact same value.
+IMPORTANT: The directory name MUST match the app name. `nuon sync` uses the directory name to find the app. Always ensure the directory name and `nuon apps create --name=` use the exact same value.
+
+Note: The Nuon CLI also has a built-in scaffolding command: `nuon apps init --interactive` with prebuilt templates (`--prebuild-template aws-eks`). The plugin's AI-guided approach offers more customization, but users may prefer the CLI's native scaffolding for quick starts.
 
 After generating, suggest the user's next steps:
 1. Review and customize the generated configs
 2. Install the Nuon CLI if not already installed (`brew install nuonco/tap/nuon`)
 3. Create the app: `nuon apps create --name=<directory-name>` (must match the directory name exactly)
-4. Sync the config: `cd <directory-name> && nuon apps sync`
+4. Sync the config: `cd <directory-name> && nuon sync`

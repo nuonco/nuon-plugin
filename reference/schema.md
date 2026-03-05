@@ -834,14 +834,19 @@ The first line of each TOML file must be one of these comments for the Nuon LSP:
 |---------|-----------|
 | `# metadata` | metadata.toml |
 | `# inputs` | inputs.toml |
+| `# input` | inputs/\<name\>.toml (individual input in directory-based layout) |
+| `# input-group` | input_groups/\<name\>.toml (individual input group) |
 | `# sandbox` | sandbox.toml |
 | `# runner` | runner.toml |
 | `# stack` | stack.toml |
 | `# secrets` | secrets.toml |
+| `# secret` | secrets/\<name\>.toml (individual secret in directory-based layout) |
 | `# permissions` | permissions.toml |
 | `# policies` | policies.toml |
+| `# policy` | policies/\<name\>.toml (individual policy in directory-based layout) |
 | `# installer` | installer.toml |
 | `# install` | installs/*.toml |
+| `# break-glass` | break_glass.toml |
 | `# action` | actions/*.toml |
 | `# terraform` | components/*.toml (terraform_module) |
 | `# helm` | components/*.toml (helm_chart) |
@@ -866,6 +871,9 @@ job
 # Sync Commands
 
 ```bash
-nuon apps sync                              # Sync app config
+nuon sync                                   # Sync app config (preferred)
+nuon apps sync                              # Sync app config (deprecated alias)
 nuon installs sync -a <app> -d <path>       # Sync install configs
 ```
+
+Note: `nuon sync` is the preferred top-level shorthand. `nuon apps sync` still works but shows a deprecation notice.
