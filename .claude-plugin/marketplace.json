@@ -1,0 +1,17 @@
+{
+  "name": "nuon-marketplace",
+  "owner": {
+    "name": "Nuon",
+    "email": "support@nuon.co"
+  },
+  "metadata": {
+    "description": "Official Nuon plugins for Claude Code"
+  },
+  "plugins": [
+    {
+      "name": "nuon",
+      "source": "./",
+      "description": "Create Nuon BYOC app configurations with AI-guided assistance"
+    }
+  ]
+}
