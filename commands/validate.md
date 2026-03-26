@@ -9,6 +9,9 @@ Find and read all Nuon config files (.toml, values/*.yaml) in the current direct
 - Broken template syntax (unbalanced `{{ }}`, invalid variable paths)
 - References to undefined inputs or components
 - Circular component dependencies
+- Use of deprecated `var` array or `env_var` array (must use `[vars]` map / `[env_vars]` map)
+- Missing `display_name` or `group` on inputs
+- GCP install missing `project_id` or `region` in `[gcp_account]`
 
 **Warnings** (should fix):
 - Component files not numbered (should be 0-name.toml, 1-name.toml)
@@ -16,6 +19,14 @@ Find and read all Nuon config files (.toml, values/*.yaml) in the current direct
 - Missing permissions (provision, maintenance, deprovision)
 - Missing break_glass.toml
 - Resources without `{{ .nuon.install.id }}` in names
+- Use of deprecated `internal` field on inputs
+
+**New fields to be aware of**:
+- runner.toml: `role`, `enable_kube_config`, `cloud_platform`, `gcp_permissions`, `gcp_predefined_role`
+- GCP installs: `[gcp_account]` with `project_id` and `region`
+- Components: `take_ownership`, `build_timeout`, `deploy_timeout`
+- kubernetes_manifest components: kustomize fields `path`, `patches`, `enable_helm`, `load_restrictor`
+- Inputs: `type`, `user_configurable` (the `internal` field is deprecated)
 
 **Best practices**:
 - Inputs grouped by concern
