@@ -40,7 +40,7 @@ Check Chart.yaml for dependencies (postgresql, redis, mysql, elasticsearch, etc.
 
 ## Step 4: Generate Nuon Configuration
 
-CRITICAL: Nuon TOML uses a **flat structure** - NO nested `[component]` wrappers. The first line MUST be a type comment. Use `dependencies` NOT `depends_on`. Use `[values]` for inline values and `[[values_file]]` for YAML files.
+CRITICAL: Nuon TOML uses a **flat structure** - NO nested `[component]` wrappers. The first line MUST be a type comment. Use `dependencies` NOT `depends_on`. Use `[values]` for inline values and `[[values_file]]` for YAML files. NEVER use the deprecated `value` array — always use the `[values]` map. Helm components may include `take_ownership`, `build_timeout`, and `deploy_timeout` fields.
 
 Create three files:
 
@@ -108,13 +108,16 @@ description  = "Application scaling configuration"
 display_name = "Scaling"
 
 [[input]]
-name         = "replica_count"
-description  = "Number of application pod replicas"
-default      = "3"
-display_name = "Replica Count"
-group        = "scaling"
-type         = "number"
+name              = "replica_count"
+description       = "Number of application pod replicas"
+default           = "3"
+display_name      = "Replica Count"
+group             = "scaling"
+type              = "number"
+user_configurable = true
 ```
+
+Note: `display_name` and `group` are required on every `[[input]]`. Use `type` and `user_configurable` where appropriate. Do NOT use the deprecated `internal` field.
 
 ## Reference
 

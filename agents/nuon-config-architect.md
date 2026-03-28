@@ -36,7 +36,7 @@ my-app/
 ├── metadata.toml           # App name, description, version
 ├── inputs.toml             # Customer input definitions
 ├── sandbox.toml            # Base infrastructure (Terraform)
-├── runner.toml             # Runner type (aws/azure)
+├── runner.toml             # Runner type (aws/azure/gcp)
 ├── stack.toml              # CloudFormation/Bicep template
 ├── secrets.toml            # Secret definitions
 ├── permissions/            # IAM role definitions
@@ -117,13 +117,16 @@ Key rules:
 - Dot-notation keys in `[values]` must be quoted: `"nested.key" = "value"`
 - `chart_name` is REQUIRED for helm_chart components
 - `terraform_version` is REQUIRED for terraform_module components
+- All component types support `build_timeout` and `deploy_timeout` fields (duration strings, e.g. `"30m"`)
+- Helm chart components support `take_ownership = true` to adopt an existing Helm release without error
+- `kubernetes_manifest` components support kustomize as an alternative to inline manifests: set `[kustomize]` with `path`, optional `patches`, `enable_helm`, and `load_restrictor` fields
 
 ## IMPORTANT: Never Fabricate Repository Paths
 
 When creating component TOMLs with `[public_repo]`, ONLY reference repos and paths that are KNOWN to exist. Verified sources include:
 
 - `nuonco/example-app-configs` with directories matching the bundled examples (e.g., `grafana/src/components/rds_cluster`, `eks-simple/src/components/certificate`, `eks-simple/src/components/alb`, `eks-simple/src/components/whoami`, `aws-lambda/src/components/*`)
-- `nuonco/aws-eks-sandbox`, `nuonco/aws-eks-karpenter-sandbox`, `nuonco/azure-aks-sandbox` (sandbox repos)
+- `nuonco/aws-eks-sandbox`, `nuonco/aws-eks-karpenter-sandbox`, `nuonco/azure-aks-sandbox`, `nuonco/gcp-gke-sandbox` (sandbox repos)
 - Any repo the user explicitly provides
 
 If you need a Terraform module that doesn't exist in the examples (e.g., an S3 bucket, ElastiCache Redis, Elasticsearch), you MUST either:
@@ -139,7 +142,7 @@ NEVER invent repo paths like `nuonco/components` or assume modules exist at path
 - The `name` field inside the TOML uses underscores: `name = "rds_cluster"` (the file is `1-rds-cluster.toml`)
 - Keep comments in TOML, Helm, and Terraform files to a minimum or none at all
 - Be concise, technical, and proactive
-- Use the standard sandbox repos (`nuonco/aws-eks-sandbox`, `nuonco/aws-eks-karpenter-sandbox`, `nuonco/azure-aks-sandbox`)
+- Use the standard sandbox repos (`nuonco/aws-eks-sandbox`, `nuonco/aws-eks-karpenter-sandbox`, `nuonco/azure-aks-sandbox`, `nuonco/gcp-gke-sandbox`)
 
 ## Value Classification Framework
 
@@ -186,14 +189,17 @@ nuon orgs select
 # Create app
 nuon apps create --name=my-app
 
+# Deselect the current app
+nuon apps deselect
+
+# Rename an app
+nuon apps rename --name <name> --app-id <id>
+
 # Sync config (top-level shorthand — preferred)
 nuon sync
 
 # Validate config locally
 nuon apps validate
-
-# Dev workflow (sync + build + deploy in one step)
-nuon dev
 
 # Check builds
 nuon builds list -c component_name
@@ -204,10 +210,59 @@ nuon apps init --interactive
 nuon apps init --prebuild-template aws-eks
 
 # Manage app variables (replaces `nuon secrets`)
-nuon apps variables list
-nuon apps variables create --name=my_var --value=my_value
+nuon apps variables list --app-id <id>
+nuon apps variables create --app-id <id> --name <name> --value <val>
+nuon apps variables delete --app-id <id> --variable-id <id> --confirm
 ```
 
 Note: `nuon apps sync` still works but is deprecated in favor of `nuon sync`. Similarly, `nuon secrets` is deprecated in favor of `nuon apps variables`.
 
+The CLI config file lives at `~/.config/nuon/config` (not `~/.nuon`).
+
+Extensions commands:
+
+```bash
+nuon extensions browse           # Browse available extensions
+nuon extensions upgrade [--force] # Upgrade installed extensions
+nuon extensions exec <name>      # Execute an extension
+nuon extensions remove <name>    # Remove an installed extension
+```
+
 If the user doesn't have the CLI installed, suggest they install it but note that config creation works without it.
+
+## IAM Permissions and Actions
+
+When defining IAM roles in `permissions/*.toml`:
+- Roles now support a `cloud_platform` field (`aws`, `azure`, or `gcp`) to target a specific cloud.
+- For GCP, policies can use `gcp_permissions` (list of IAM permission strings) or `gcp_predefined_role` (e.g. `"roles/storage.admin"`) instead of AWS-style policy documents.
+
+When defining actions in `actions/*.toml`:
+- Use `role` (preferred) instead of the deprecated `break_glass_role` to specify the IAM role the action assumes.
+- `enable_kube_config` is a `*bool` field (defaults to `true`) that controls whether kubeconfig is injected into the action environment.
+
+## Install and Runner Configuration
+
+Installs now support a `gcp_account` block for GCP-targeted installs:
+
+```toml
+[gcp_account]
+project_id = "my-gcp-project"
+region     = "us-central1"
+```
+
+Runner `type` field accepts `aws`, `azure`, or `gcp`.
+
+## App Metadata (metadata.toml / AppConfig)
+
+Top-level AppConfig supports two new fields:
+- `readme` — a templatable markdown string shown to customers; Go template variables are supported.
+- `branch` — sets the default branch used for connected repo components when no branch is specified.
+
+## Inputs Schema
+
+Input fields now support additional properties:
+- `type` — one of `string`, `number`, `list`, `json`, `bool` (default `string`)
+- `user_configurable` — boolean flag controlling whether the customer can set this value at install time
+- `display_name` — **required** human-readable label shown in the UI
+- `group` — **required** grouping key for organizing inputs in the UI
+- `internal` is deprecated; use `user_configurable = false` instead

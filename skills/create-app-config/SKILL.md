@@ -40,8 +40,8 @@ IMPORTANT: The directory name MUST match the app name. `nuon apps sync` uses the
 
 After user approves the plan, generate all configuration files:
 
-1. `metadata.toml` - version, display_name, description
-2. `inputs.toml` - grouped customer inputs
+1. `metadata.toml` - version, display_name, description. May also include `readme` (path to a README file) and `branch` (default branch for the app config)
+2. `inputs.toml` - grouped customer inputs. Every `[[input]]` MUST have `display_name` and `group`. Use `type` (e.g. `"string"`, `"number"`, `"boolean"`) and `user_configurable` where appropriate. Do NOT use the deprecated `internal` field
 3. `sandbox.toml` - base infrastructure (typically `nuonco/aws-eks-sandbox`)
 4. `runner.toml` - runner type and config
 5. `stack.toml` - CloudFormation/Bicep template config
@@ -91,7 +91,10 @@ region     = "{{ .nuon.install_stack.outputs.region }}"
 Key rules:
 - Use `dependencies` NOT `depends_on`
 - Use `[values]` or `[[values_file]]` for Helm, `[vars]` or `[[var_file]]` for Terraform
+- NEVER use deprecated `var` arrays or `env_var` arrays — always use `[vars]` and `[env_vars]` maps
 - `chart_name` required for helm_chart, `terraform_version` required for terraform_module
+- Components may include `take_ownership`, `build_timeout`, and `deploy_timeout` fields
+- kubernetes_manifest components support kustomize fields: `path`, `patches`, `enable_helm`, `load_restrictor`
 - File naming: `0-docker-image.toml` (dashes), field naming: `name = "docker_image"` (underscores)
 
 ## Style
@@ -100,6 +103,6 @@ Key rules:
 - Use dash-separated names for files: `0-docker-image.toml`, `1-rds-cluster.toml`
 - Minimal or no comments in TOML/Helm/Terraform files
 - Use `{{ .nuon.install.id }}` in resource names for uniqueness
-- Default to `nuonco/aws-eks-sandbox` for AWS, `nuonco/azure-aks-sandbox` for Azure
+- Default to `nuonco/aws-eks-sandbox` for AWS, `nuonco/azure-aks-sandbox` for Azure, `nuonco/gcp-gke-sandbox` for GCP
 
 $ARGUMENTS

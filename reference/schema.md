@@ -112,7 +112,7 @@ Header comment: `# inputs`
 | `required` | boolean | No | Whether customer must provide a value |
 | `sensitive` | boolean | No | Mask value in UI/logs after install creation |
 | `type` | string | No | Data type: `"string"`, `"number"`, `"list"`, `"json"`, `"bool"` |
-| `internal` | boolean | No | Only settable via admin panel |
+| `internal` | boolean | No | **Deprecated.** Only settable via admin panel |
 | `user_configurable` | boolean | No | Modifiable by end users after installation |
 
 ```toml
@@ -289,6 +289,7 @@ Header comment: `# permissions`
 | `display_name` | string | No | Display name in installer UI |
 | `policies` | array | Yes | List of IAM policies |
 | `permissions_boundary` | string | No | ARN or file path to permissions boundary policy |
+| `cloud_platform` | string | No | Target cloud platform for this role: "aws", "azure", or "gcp". Defaults to runner_type if omitted |
 
 ### Policy fields (within a role)
 
@@ -297,6 +298,8 @@ Header comment: `# permissions`
 | `name` | string | No | Policy name |
 | `contents` | string | No | Inline IAM policy JSON or file reference |
 | `managed_policy_name` | string | No | AWS managed policy name (e.g., `"AdministratorAccess"`) |
+| `gcp_permissions` | array | No | [GCP only] List of individual GCP IAM permission strings (e.g., "storage.objects.get") |
+| `gcp_predefined_role` | string | No | [GCP only] GCP predefined role name (e.g., "roles/editor"). Mutually exclusive with gcp_permissions |
 
 ```toml
 # permissions
@@ -626,6 +629,17 @@ Header comment: `# kubernetes-manifest`
 | `namespace` | string | Yes | K8s namespace (supports templating) |
 | `drift_schedule` | string | No | Cron expression for drift detection |
 
+### KustomizeConfig fields
+
+`manifest` and `kustomize` are mutually exclusive (oneOf). When using `kustomize`, `public_repo` or `connected_repo` is required.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `path` | string | Yes | Path to kustomization directory relative to source root |
+| `patches` | array | No | Additional patch files to apply after kustomize build |
+| `enable_helm` | boolean | No | Enable Helm chart inflation during kustomize build |
+| `load_restrictor` | string | No | File load restrictor: `"none"` or `"rootOnly"` (default: rootOnly) |
+
 ```toml
 # kubernetes-manifest
 name      = "app_config"
@@ -653,6 +667,7 @@ Header comment: `# job` or within actions as `type = "job"`
 |-------|------|----------|-------------|
 | `image_url` | string | Yes | Docker image URL (supports templating) |
 | `tag` | string | Yes | Image tag (supports templating) |
+| `args` | array | No | Arguments passed to the command |
 
 ```toml
 # In actions/eks_job.toml
@@ -681,6 +696,8 @@ Header comment: `# action`
 | `steps` | array | Yes | Ordered list of execution steps |
 | `dependencies` | array | No | Component names referenced in this action |
 | `break_glass_role` | string | No | Name of a break-glass role for elevated permissions |
+| `role` | string | No | IAM role name for action execution. Preferred over break_glass_role |
+| `enable_kube_config` | boolean | No | Whether to fetch and inject kubeconfig. Defaults to true. Set false for actions without K8s access needs |
 
 ### Trigger fields (within `[[triggers]]`)
 
@@ -761,6 +778,7 @@ Header comment: `# install`
 | `name` | string | Yes | Unique install name |
 | `approval_option` | string | No | `"approve-all"` (auto) or `"prompt"` (manual confirmation) |
 | `aws_account` | object | No | AWS account settings (contains `region` field) |
+| `gcp_account` | object | No | GCP account settings (project_id, region) |
 | `inputs` | array | No | Input values as list of key-value group objects |
 
 All input values must be strings. They are parsed to the correct type by Nuon. Sensitive inputs are excluded from config files and managed via dashboard.
@@ -772,6 +790,10 @@ approval_option = "approve-all"
 
 [aws_account]
 region = "us-east-1"
+
+[gcp_account]
+project_id = "my-gcp-project"
+region     = "us-central1"
 
 [[inputs]]
 db_host = "prod-db.example.com"

@@ -104,6 +104,8 @@ chart_name     = "redis"
 namespace      = "redis"
 storage_driver = "configmap"
 dependencies   = ["postgres"]
+build_timeout  = "30m"
+deploy_timeout = "30m"
 
 [helm_repo]
 repo_url = "https://charts.bitnami.com/bitnami"
@@ -121,20 +123,22 @@ description  = "Redis configuration"
 display_name = "Redis"
 
 [[input]]
-name         = "redis_password"
-description  = "Redis authentication password"
-default      = ""
-display_name = "Redis Password"
-group        = "redis"
-sensitive    = true
+name              = "redis_password"
+description       = "Redis authentication password"
+default           = ""
+display_name      = "Redis Password"
+group             = "redis"
+sensitive         = true
+user_configurable = true
 
 [[input]]
-name         = "redis_replica_count"
-description  = "Number of Redis replicas"
-default      = "3"
-display_name = "Redis Replicas"
-group        = "redis"
-type         = "number"
+name              = "redis_replica_count"
+description       = "Number of Redis replicas"
+default           = "3"
+display_name      = "Redis Replicas"
+group             = "redis"
+type              = "number"
+user_configurable = true
 ```
 
 Summary of correct field usage:
@@ -147,6 +151,8 @@ Summary of correct field usage:
 - `chart_name` is REQUIRED for helm_chart components
 - `namespace` should always be specified
 - `storage_driver = "configmap"` is the standard
+- `build_timeout` and `deploy_timeout` - optional duration strings (e.g. `"30m"`, `"1h"`) controlling how long Nuon waits for the build or Helm deploy phase before failing; omit to use platform defaults
+- `take_ownership = true` - set this when adopting an existing Helm release that was NOT originally installed by Nuon (e.g. migrating a manually-deployed chart into Nuon management); causes Nuon to run `helm upgrade --take-ownership` instead of a fresh install
 
 ## Output Format
 
@@ -163,6 +169,9 @@ chart_name     = "grafana"
 namespace      = "grafana"
 storage_driver = "configmap"
 dependencies   = ["rds_cluster", "redis"]
+build_timeout  = "30m"
+deploy_timeout = "30m"
+# take_ownership = true  # uncomment when adopting a pre-existing Helm release
 
 [helm_repo]
 repo_url = "https://grafana.github.io/helm-charts"
@@ -240,13 +249,16 @@ description  = "Application scaling configuration"
 display_name = "Scaling"
 
 [[input]]
-name         = "replica_count"
-description  = "Number of application pod replicas"
-default      = "1"
-display_name = "Replica Count"
-group        = "scaling"
-type         = "number"
+name              = "replica_count"
+description       = "Number of application pod replicas"
+default           = "1"
+display_name      = "Replica Count"
+group             = "scaling"
+type              = "number"
+user_configurable = true
 ```
+
+> `user_configurable = true` marks an input as visible and editable by the end customer in the Nuon dashboard. Set it on every input that a customer should be able to change themselves; omit or set `false` for inputs that should be operator-only.
 
 ## Dependency Detection
 
@@ -265,6 +277,20 @@ When analyzing a chart, look for these dependency indicators:
 | References to load balancers | Helm ALB component |
 
 For each detected dependency, suggest creating a separate Nuon component and wire them together.
+
+## Permissions / IAM
+
+When a Helm component needs cloud IAM permissions (e.g. for pod IAM roles or IRSA), Nuon supports multi-cloud grants. Relevant fields on a component:
+
+- `cloud_platform` - one of `"aws"`, `"azure"`, or `"gcp"` (defaults to the install's cloud)
+- `gcp_permissions` - list of fine-grained GCP IAM permissions to grant the component's service account
+- `gcp_predefined_role` - a GCP predefined role name (e.g. `"roles/storage.objectViewer"`) to grant instead of or alongside `gcp_permissions`
+
+AWS IAM is typically handled via Terraform components or IRSA annotations in the values file; call out any IAM requirements you detect and suggest the appropriate approach for the target cloud.
+
+## Kustomize Note
+
+If you are suggesting a `kubernetes_manifest` component alongside a Helm component (e.g. for CRDs, namespaces, or supplemental resources), be aware that `kubernetes_manifest` components now support **kustomize** as an alternative to inline manifests. A kustomize-backed manifest component points to a directory containing a `kustomization.yaml` rather than a single YAML file. Mention this option when inline manifests would become unwieldy.
 
 ## Reference
 

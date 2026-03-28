@@ -19,13 +19,14 @@ Read all discovered files.
 Read `reference/schema.md` and check each file against its schema:
 
 - **metadata.toml**: Must have `version` (should be "v2"), `display_name`, `description`
-- **inputs.toml**: Each `[[input]]` needs `name`, `display_name`, `description`, `group`. Groups need `name`, `display_name`, `description`
+- **inputs.toml**: Each `[[input]]` needs `name`, `display_name`, `description`, `group`. Both `display_name` and `group` are required. Also check for `type` (e.g. `"string"`, `"number"`, `"boolean"`) and `user_configurable`. The `internal` field is deprecated — flag it as a warning. Groups need `name`, `display_name`, `description`
 - **sandbox.toml**: Needs `terraform_version`, repo config (`[public_repo]` or `[connected_repo]`), `[vars]`
-- **runner.toml**: Needs `runner_type` (aws/azure)
+- **runner.toml**: Needs `runner_type` (aws/azure/gcp). Check `role` and `enable_kube_config` if present. Check `cloud_platform` and GCP-specific fields (`gcp_permissions`, `gcp_predefined_role`) for GCP runners. Installs may have a `[gcp_account]` block with `project_id` and `region`
 - **stack.toml**: Needs `type` (aws-cloudformation/azure-bicep/nested), `name`
-- **Components**: Each needs `name`, `type`, type-specific fields. Check `type` is one of: helm_chart, terraform_module, docker_build, container_image, kubernetes_manifest, job
+- **Components**: Each needs `name`, `type`, type-specific fields. Check `type` is one of: helm_chart, terraform_module, docker_build, container_image, kubernetes_manifest, job. Also check for `take_ownership`, `build_timeout`, `deploy_timeout`. For kubernetes_manifest components, check kustomize fields: `path`, `patches`, `enable_helm`, `load_restrictor`
 - **Repo configs**: Only one of `[public_repo]`, `[connected_repo]`, or `[helm_repo]` may be defined per component/sandbox (they are mutually exclusive)
 - **Version fields**: `terraform_version` and similar version fields must be quoted strings (e.g., `"1.5.0"` not `1.5.0` — unquoted dotted numbers are invalid TOML)
+- **Deprecated fields — ERROR**: Using `var` (array) instead of `[vars]` (map) or `env_var` (array) instead of `[env_vars]` (map) are errors, not warnings. Flag these as Errors and provide the corrected map syntax
 
 ## Step 3: Template Validation
 
@@ -78,11 +79,15 @@ Present findings as:
 - Invalid component types
 - Broken template references
 - Circular dependencies
+- Use of deprecated `var` array or `env_var` array (must use `[vars]` map / `[env_vars]` map)
+- Missing `display_name` or `group` on inputs
+- GCP install missing `project_id` or `region` in `[gcp_account]`
 
 **Warnings** (should fix):
 - Missing best practice fields
 - Unnumbered component files
 - Sensitive inputs without `sensitive = true`
+- Use of deprecated `internal` field on inputs
 
 **Info**:
 - Total files found
