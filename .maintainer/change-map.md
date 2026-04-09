@@ -13,7 +13,7 @@ Required fields are marked with `jsonschema:"required"`. Descriptions come from 
 | Upstream File | Plugin Files to Update | What to Look For |
 |---|---|---|
 | `pkg/config/component.go` | `reference/schema.md`, `agents/nuon-config-architect.md`, `agents/helm-analyzer.md` | Base component fields (name, type, var_name, dependencies, build_timeout, deploy_timeout), ComponentType enum values |
-| `pkg/config/helm_chart_component.go` | `reference/schema.md`, `agents/helm-analyzer.md`, `skills/convert-helm/SKILL.md` | Helm fields (chart_name, values, values_file, namespace, storage_driver, helm_repo, drift_schedule) |
+| `pkg/config/helm_chart_component.go` | `reference/schema.md`, `agents/helm-analyzer.md`, `skills/create-app-config/SKILL.md` | Helm fields (chart_name, values, values_file, namespace, storage_driver, helm_repo, drift_schedule) |
 | `pkg/config/terraform_module_component.go` | `reference/schema.md`, `agents/nuon-config-architect.md` | Terraform fields (terraform_version, vars, var_file, env_vars, drift_schedule) |
 | `pkg/config/docker_build_component.go` | `reference/schema.md` | Docker build fields |
 | `pkg/config/external_image_component.go` | `reference/schema.md` | External/container image fields |

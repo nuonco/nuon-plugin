@@ -167,8 +167,7 @@ After the maintainer reviews and approves:
 - `reference/system-prompt.md` — Standalone system prompt for Helm conversion
 - `agents/nuon-config-architect.md` — Main config expert agent prompt
 - `agents/helm-analyzer.md` — Helm conversion specialist agent prompt
-- `skills/create-app-config/SKILL.md` — Config generation skill
-- `skills/convert-helm/SKILL.md` — Helm conversion skill
+- `skills/create-app-config/SKILL.md` — Config generation and Helm conversion skill
 - `skills/validate-config/SKILL.md` — Validation skill
 - `commands/init.md` — /nuon:init command
 - `commands/convert.md` — /nuon:convert command
