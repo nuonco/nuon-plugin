@@ -1,6 +1,6 @@
 ---
 name: create-app-config
-description: Generate a Nuon BYOC app configuration from a description of the user's application. Invoke when users describe an app they want to deploy with Nuon, ask about BYOC deployment, or mention creating Nuon configs.
+description: Generate a Nuon BYOC app configuration from a description of the user's application. Invoke when users describe an app they want to deploy with Nuon, ask about BYOC deployment, mention creating Nuon configs, or want to convert Helm charts (values.yaml, Chart.yaml, ArtifactHub) to Nuon components.
 ---
 
 You are creating a Nuon app configuration.
@@ -23,6 +23,24 @@ Read these files from the plugin for accurate schema and pattern information:
 - `reference/patterns.md` for architecture patterns matching their use case
 - `reference/templating.md` for template variable syntax
 - Browse `examples/` to find the closest matching pattern
+
+## Step 2b: Helm Chart Value Classification
+
+When converting Helm charts (user provides values.yaml, Chart.yaml, a Helm repo URL, an ArtifactHub link, or describes a chart they use), classify every value before generating files:
+
+| Category | Destination | When |
+|----------|------------|------|
+| **Customer Input** | `inputs.toml` → `{{ .nuon.inputs.inputs.X }}` | Differs per customer |
+| **Infra-Derived** | `{{ .nuon.install.sandbox.outputs.X }}` | From cloud infrastructure |
+| **Component-Derived** | `{{ .nuon.components.X.outputs.Y }}` | From another Nuon component |
+| **Hardcoded Default** | Static in values file | Vendor default, rarely changes |
+
+Present the classification to the user as a table before generating files.
+
+Also check Chart.yaml for dependencies (postgresql, redis, mysql, elasticsearch, etc.). For each dependency:
+- Suggest creating a separate Nuon component (Terraform RDS or Helm subchart)
+- Show how to wire the connection via `{{ .nuon.components.X.outputs.Y }}`
+- Reference `examples/grafana/` for the RDS + Helm pattern
 
 ## Step 3: Plan the Configuration
 
