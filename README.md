@@ -39,8 +39,7 @@ claude --plugin-dir /path/to/nuon-plugin
 
 The plugin also includes skills that Claude invokes automatically when relevant:
 
-- **create-app-config** - Triggers when you describe an app you want to deploy with Nuon
-- **convert-helm** - Triggers when you provide a Helm chart for conversion
+- **create-app-config** - Triggers when you describe an app you want to deploy with Nuon, or provide a Helm chart for conversion
 - **validate-config** - Triggers when you ask to check or validate Nuon configs
 
 ### Agents
@@ -57,8 +56,7 @@ nuon-plugin/
 │   ├── nuon-config-architect.md  # Primary Nuon config expert
 │   └── helm-analyzer.md          # Helm conversion specialist
 ├── skills/                       # Auto-invoked skills
-│   ├── create-app-config/        # Generate app configs
-│   ├── convert-helm/             # Helm to Nuon conversion
+│   ├── create-app-config/        # Generate app configs / Helm conversion
 │   └── validate-config/          # Config validation
 ├── commands/                     # User-invoked slash commands
 │   ├── init.md                   # /nuon:init
