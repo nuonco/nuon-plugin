@@ -9,19 +9,5 @@
   "homepage": "https://docs.nuon.co",
   "repository": "https://github.com/nuonco/nuon-plugin",
   "license": "Apache-2.0",
-  "keywords": ["nuon", "byoc", "infrastructure", "deployment", "helm", "terraform"],
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "filePattern": "**/*.toml",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "The file just written/edited is a .toml file. If it appears to be a Nuon app configuration (contains fields like 'type', 'name', 'terraform_version', 'helm_repo', 'runner_type', '[[input]]', '[[group]]', 'runner_type', 'chart_name', 'namespace', or template expressions like '{{ .nuon'), briefly check for: (1) invalid Go template syntax - every {{ must have matching }}, (2) common typos like '.nuon.input.inputs' (should be '.nuon.inputs.inputs') or 'terrafrom_version' or 'helm_rpo', (3) missing required 'name' or 'type' field for components, (4) unquoted version numbers (e.g. terraform_version = 1.5.0 should be terraform_version = \"1.5.0\"), (5) mutually exclusive repo sections defined together (only one of [public_repo], [connected_repo], or [helm_repo] may be used). Only mention real issues found. Be very concise (1-2 lines). If no issues or not a Nuon config file, say nothing."
-          }
-        ]
-      }
-    ]
-  }
+  "keywords": ["nuon", "byoc", "infrastructure", "deployment", "helm", "terraform"]
 }
