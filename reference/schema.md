@@ -453,7 +453,7 @@ All components share these base fields:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | string | Yes | Unique component name within the app |
-| `type` | string | Yes | Component type: `"terraform_module"`, `"helm_chart"`, `"docker_build"`, `"container_image"`, `"kubernetes_manifest"`, `"job"` |
+| `type` | string | Yes | Component type: `"terraform_module"`, `"helm_chart"`, `"docker_build"`, `"container_image"`, `"kubernetes_manifest"`, `"job"`, `"pulumi"` |
 | `var_name` | string | No | Variable name for outputs (defaults to component name) |
 | `dependencies` | array | No | Component names that must deploy first |
 | `build_timeout` | string | No | Build timeout duration (e.g., `"30m"`, `"1h"`) |
@@ -678,6 +678,40 @@ image_url = "{{.nuon.components.app_image.image.repository.uri}}"
 tag       = "{{.nuon.components.app_image.image.tag}}"
 ```
 
+## pulumi
+
+Purpose: Deploy infrastructure with a Pulumi program (TypeScript, Python, Go, .NET).
+
+Header comment: `# pulumi`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `runtime` | string | Yes | Pulumi runtime (e.g., `"nodejs"`, `"python"`, `"go"`, `"dotnet"`) |
+| `pulumi_version` | string | No | Pulumi CLI version to use |
+| `config` | object | No | Pulumi stack config values (key → value, e.g. `"aws:region"`) |
+| `env_vars` | object | No | Environment variables for the Pulumi program |
+| `public_repo` | PublicRepoConfig | No | Public repo with the Pulumi program (one of public_repo/connected_repo required) |
+| `connected_repo` | ConnectedRepoConfig | No | Private repo with the Pulumi program (one of public_repo/connected_repo required) |
+| `drift_schedule` | string | No | Cron expression for drift detection (supports templating) |
+| `max_auto_retries` | int | No | Max automatic retries on failure |
+| `skip_noops` | bool | No | Skip deploys that produce no changes |
+| `auto_approve_on_policies_passing` | bool | No | Auto-approve the deploy when policy checks pass |
+
+```toml
+# pulumi
+name           = "infra"
+type           = "pulumi"
+runtime        = "nodejs"
+
+[connected_repo]
+directory = "infra/pulumi"
+repo      = "org/repo"
+branch    = "main"
+
+[config]
+"aws:region" = "{{ .nuon.install_stack.outputs.region }}"
+```
+
 ---
 
 # Advanced Features
@@ -845,6 +879,7 @@ Purpose: Reference an external component definition via `source` field.
 | `job` | object | No | Job config (when type is `"job"`) |
 | `external_image` | object | No | Container image config (when type is `"container_image"`) |
 | `kubernetes_manifest` | object | No | K8s manifest config (when type is `"kubernetes_manifest"`) |
+| `pulumi` | object | No | Pulumi config (when type is `"pulumi"`) |
 
 ---
 
@@ -876,6 +911,7 @@ The first line of each TOML file must be one of these comments for the Nuon LSP:
 | `# container-image` | components/*.toml (container_image) |
 | `# kubernetes-manifest` | components/*.toml (kubernetes_manifest) |
 | `# job` | components/*.toml (job) |
+| `# pulumi` | components/*.toml (pulumi) |
 
 ---
 
@@ -888,6 +924,7 @@ docker_build
 container_image
 kubernetes_manifest
 job
+pulumi
 ```
 
 # Sync Commands

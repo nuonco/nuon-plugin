@@ -3,11 +3,15 @@ set -euo pipefail
 
 # detect-changes.sh
 # Compares baseline.json against current upstream state via GitHub API.
-# Outputs a JSON report of changed files for both repos.
+# Outputs a JSON report of changed files for nuonco/nuon.
 #
 # Usage: bash .maintainer/scripts/detect-changes.sh
 # Output: JSON to stdout (human-readable summary to stderr)
-# Requirements: gh CLI authenticated, NUON_MONO_PAT env var set
+# Requirements: gh CLI authenticated
+#
+# Note: only nuonco/nuon (the public, customer-facing repo) is tracked.
+# nuonco/mono is intentionally NOT tracked — it is internal tooling/infra
+# and has no bearing on how a customer authors a config or uses the CLI.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MAINTAINER_DIR="$(dirname "$SCRIPT_DIR")"
@@ -20,11 +24,6 @@ if ! command -v gh &>/dev/null; then
   exit 1
 fi
 
-if [ -z "${NUON_MONO_PAT:-}" ]; then
-  echo "ERROR: NUON_MONO_PAT environment variable not set." >&2
-  exit 1
-fi
-
 if [ ! -f "$BASELINE_FILE" ]; then
   echo "ERROR: baseline.json not found. Run seed-baseline.sh first." >&2
   exit 1
@@ -33,22 +32,18 @@ fi
 # --- Read baseline ---
 
 NUON_BASELINE_COMMIT=$(jq -r '.repos["nuonco/nuon"].commit' "$BASELINE_FILE")
-MONO_BASELINE_COMMIT=$(jq -r '.repos["nuonco/mono"].commit' "$BASELINE_FILE")
 LAST_SYNC=$(jq -r '.last_sync' "$BASELINE_FILE")
 
 echo "Baseline from: $LAST_SYNC" >&2
 echo "  nuonco/nuon: ${NUON_BASELINE_COMMIT:0:12}" >&2
-echo "  nuonco/mono: ${MONO_BASELINE_COMMIT:0:12}" >&2
 echo "" >&2
 
-# --- Get current HEAD commits ---
+# --- Get current HEAD commit ---
 
 NUON_CURRENT=$(gh api repos/nuonco/nuon/commits/main --jq '.sha')
-MONO_CURRENT=$(GH_TOKEN="$NUON_MONO_PAT" gh api repos/nuonco/mono/commits/main --jq '.sha')
 
 echo "Current HEAD:" >&2
 echo "  nuonco/nuon: ${NUON_CURRENT:0:12}" >&2
-echo "  nuonco/mono: ${MONO_CURRENT:0:12}" >&2
 echo "" >&2
 
 # --- Detect changes in nuonco/nuon ---
@@ -87,43 +82,9 @@ else
   fi
 fi
 
-# --- Detect changes in nuonco/mono ---
-
-MONO_CHANGES="[]"
-MONO_CHANGED=false
-
-if [ "$MONO_BASELINE_COMMIT" = "$MONO_CURRENT" ]; then
-  echo "nuonco/mono: no new commits" >&2
-else
-  echo "nuonco/mono: detecting changes..." >&2
-
-  MONO_ALL_CHANGES=$(GH_TOKEN="$NUON_MONO_PAT" gh api "repos/nuonco/mono/compare/${MONO_BASELINE_COMMIT}...${MONO_CURRENT}" \
-    --jq '[.files[] | {filename, status, sha}]' 2>/dev/null || echo "[]")
-
-  MONO_CHANGES=$(echo "$MONO_ALL_CHANGES" | jq '
-    [.[] | select(
-      .filename | test("^(bins/nuonctl/cmd/|bins/nuonctl/internal/|services/ctl-api/)")
-    ) | select(
-      .filename | test("\\.(go|toml|yaml|yml)$")
-    )]
-  ')
-
-  MONO_CHANGE_COUNT=$(echo "$MONO_CHANGES" | jq 'length')
-
-  if [ "$MONO_CHANGE_COUNT" -gt 0 ]; then
-    MONO_CHANGED=true
-    echo "  $MONO_CHANGE_COUNT tracked files changed" >&2
-    echo "$MONO_CHANGES" | jq -r '.[].filename' | while read -r f; do
-      echo "    - $f" >&2
-    done
-  else
-    echo "  no tracked files changed (only untracked paths)" >&2
-  fi
-fi
-
 # --- Build output ---
 
-TOTAL_CHANGES=$(( $(echo "$NUON_CHANGES" | jq 'length') + $(echo "$MONO_CHANGES" | jq 'length') ))
+TOTAL_CHANGES=$(echo "$NUON_CHANGES" | jq 'length')
 
 echo "" >&2
 echo "Total tracked changes: $TOTAL_CHANGES" >&2
@@ -134,10 +95,6 @@ if [ "$NUON_CHANGED" = true ]; then
   NUON_FILELIST=$(echo "$NUON_CHANGES" | jq -r '.[].filename' | sed 's/^/- /')
   SUMMARY+="### nuonco/nuon (${NUON_BASELINE_COMMIT:0:12} → ${NUON_CURRENT:0:12})\n\n${NUON_FILELIST}\n\n"
 fi
-if [ "$MONO_CHANGED" = true ]; then
-  MONO_FILELIST=$(echo "$MONO_CHANGES" | jq -r '.[].filename' | sed 's/^/- /')
-  SUMMARY+="### nuonco/mono (${MONO_BASELINE_COMMIT:0:12} → ${MONO_CURRENT:0:12})\n\n${MONO_FILELIST}\n\n"
-fi
 
 # Output JSON to stdout
 jq -n \
@@ -146,9 +103,6 @@ jq -n \
   --arg nuon_baseline "$NUON_BASELINE_COMMIT" \
   --arg nuon_current "$NUON_CURRENT" \
   --argjson nuon_changes "$NUON_CHANGES" \
-  --arg mono_baseline "$MONO_BASELINE_COMMIT" \
-  --arg mono_current "$MONO_CURRENT" \
-  --argjson mono_changes "$MONO_CHANGES" \
   --arg summary "$(echo -e "$SUMMARY")" \
   '{
     total_changes: $total_changes,
@@ -159,11 +113,6 @@ jq -n \
         baseline_commit: $nuon_baseline,
         current_commit: $nuon_current,
         changes: $nuon_changes
-      },
-      "nuonco/mono": {
-        baseline_commit: $mono_baseline,
-        current_commit: $mono_current,
-        changes: $mono_changes
       }
     }
   }'
