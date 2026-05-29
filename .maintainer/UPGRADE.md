@@ -9,8 +9,10 @@ and skills to stay in sync.
 ## Prerequisites
 
 - `gh` CLI must be authenticated (for nuonco/nuon public access)
-- `NUON_MONO_PAT` env var must be set (GitHub PAT with `repo` scope for nuonco/mono private access)
-- Both are required — if mono access fails, stop and tell the maintainer
+
+Only `nuonco/nuon` (the public, customer-facing repo) is tracked. `nuonco/mono` is
+intentionally NOT tracked — it is internal tooling/infrastructure and has no bearing
+on how a customer authors a config or uses the CLI. No PAT is required.
 
 ## Upgrade Workflow
 
@@ -19,7 +21,7 @@ When asked to check for upstream changes, follow these steps:
 ### Step 1: Load Baseline
 
 Read `.maintainer/baseline.json` to get:
-- Last-synced commit SHA for each repo (nuonco/nuon, nuonco/mono)
+- Last-synced commit SHA for nuonco/nuon
 - Per-file blob SHAs for all tracked files
 
 If `baseline.json` doesn't exist, tell the maintainer to run `seed-baseline.sh` first.
@@ -31,7 +33,7 @@ Run the detection script:
 bash .maintainer/scripts/detect-changes.sh
 ```
 
-This outputs JSON with changed files for both repos. If no changes detected, report that and stop.
+This outputs JSON with changed files for nuonco/nuon. If no changes detected, report that and stop.
 
 If the script isn't available or you prefer manual detection, use the GitHub API directly:
 
@@ -41,11 +43,10 @@ gh api repos/nuonco/nuon/commits/main --jq '.sha'
 
 # Compare baseline to current (nuonco/nuon)
 gh api 'repos/nuonco/nuon/compare/BASELINE_SHA...main' --jq '[.files[] | select(.filename | test("^(pkg/config/|bins/cli/|bins/lsp/|sdks/nuon-go/models/)")) | {filename, status, sha}]'
-
-# Same for mono (use NUON_MONO_PAT)
-GH_TOKEN="$NUON_MONO_PAT" gh api repos/nuonco/mono/commits/main --jq '.sha'
-GH_TOKEN="$NUON_MONO_PAT" gh api 'repos/nuonco/mono/compare/BASELINE_SHA...main' --jq '[.files[] | select(.filename | test("^(bins/nuonctl/|services/ctl-api/)")) | {filename, status, sha}]'
 ```
+
+**Tip:** the GitHub compare API caps its file list at 300. For large ranges, prefer a
+local clone (`git diff --name-status BASELINE_SHA <tag>`) to get the complete, untruncated list.
 
 ### Step 3: Read the Change Map
 
@@ -56,11 +57,7 @@ Read `.maintainer/change-map.md` to understand which plugin files are affected b
 For each changed file, fetch its current content:
 
 ```bash
-# Public repo
 gh api repos/nuonco/nuon/contents/PATH --jq '.content' | base64 -d
-
-# Private mono repo
-GH_TOKEN="$NUON_MONO_PAT" gh api repos/nuonco/mono/contents/PATH --jq '.content' | base64 -d
 ```
 
 ### Step 5: Analyze Go Source Code
@@ -121,11 +118,6 @@ Show a structured report to the maintainer:
 #### Validation Changes
 - ...
 
-### nuonco/mono (BASELINE_SHA → CURRENT_SHA)
-
-#### nuonctl Changes
-- ...
-
 ### Summary
 - X upstream files changed
 - Y plugin files need updating
@@ -138,7 +130,7 @@ After the maintainer reviews and approves:
 
 1. Apply each proposed edit to the affected plugin files
 2. Update `.maintainer/baseline.json` with:
-   - New commit SHAs for both repos
+   - New commit SHA for nuonco/nuon
    - New per-file blob SHAs for all tracked files
 3. Summarize what was changed
 
@@ -150,7 +142,7 @@ After the maintainer reviews and approves:
 2. **Preserve existing style.** When updating plugin files, match the existing formatting, tone, and structure.
 3. **Be conservative.** Only propose changes for things that clearly changed. Don't rewrite sections that are still accurate.
 4. **Flag ambiguity.** If an upstream change is unclear (e.g., a field rename vs. a new field), flag it for the maintainer to decide.
-5. **Track both repos.** Both nuonco/nuon and nuonco/mono are required. If mono access fails, report the error — do not silently skip it.
+5. **Track nuonco/nuon only.** nuonco/mono is intentionally out of scope — it is internal tooling/infra and does not affect how a customer authors a config or uses the CLI.
 
 ## File Locations
 

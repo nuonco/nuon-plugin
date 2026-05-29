@@ -5,7 +5,7 @@ Find and read all Nuon config files (.toml, values/*.yaml) in the current direct
 **Errors** (must fix):
 - Missing required files (metadata.toml, inputs.toml, sandbox.toml, runner.toml, stack.toml)
 - Missing required fields in each config file
-- Invalid component types (must be: helm_chart, terraform_module, docker_build, container_image, kubernetes_manifest, job)
+- Invalid component types (must be: helm_chart, terraform_module, docker_build, container_image, kubernetes_manifest, job, pulumi)
 - Broken template syntax (unbalanced `{{ }}`, invalid variable paths)
 - References to undefined inputs or components
 - Circular component dependencies

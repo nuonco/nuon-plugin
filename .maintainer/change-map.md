@@ -126,29 +126,9 @@ These are Cobra command definitions. Look for `cobra.Command` structs, `Flags()`
 | `bins/lsp/handlers/hover.go` | Reference only | Field descriptions on hover |
 | `bins/lsp/mappers/schema.go` | `reference/schema.md` | Schema mapping for LSP |
 
-## nuonco/mono (private)
-
-### nuonctl Internal CLI (`bins/nuonctl/`)
-
-The internal `nuonctl` tool extends beyond the public CLI. Changes here may reveal new capabilities or API surfaces.
-
-| Upstream File | Plugin Files to Update | What to Look For |
-|---|---|---|
-| `bins/nuonctl/cmd/apps.go` | `agents/nuon-config-architect.md` | Internal app management commands not in public CLI |
-| `bins/nuonctl/cmd/builds.go` | `agents/nuon-config-architect.md` | Internal build commands |
-| `bins/nuonctl/cmd/deploys.go` | `agents/nuon-config-architect.md` | Deploy management (may surface new deploy features) |
-| `bins/nuonctl/cmd/root.go` | `agents/nuon-config-architect.md` | Internal global flags |
-| `bins/nuonctl/internal/` (all `.go` files) | `agents/nuon-config-architect.md` | Internal service implementations |
-
-### ctl-api (`services/ctl-api/`)
-
-The ctl-api is mostly infrastructure (Terraform, K8s). API types are defined in `nuonco/nuon/sdks/nuon-go/models/`.
-Track config changes that may indicate new API capabilities:
-
-| Upstream File | Plugin Files to Update | What to Look For |
-|---|---|---|
-| `services/ctl-api/k8s/values.yaml` | Reference only | API configuration changes that may indicate new features |
-| `services/ctl-api/service.yml` | Reference only | Service configuration changes |
+> **Note:** `nuonco/mono` (nuonctl, ctl-api) is intentionally NOT tracked. It is internal
+> tooling/infrastructure and has no bearing on how a customer authors a config or uses the
+> `nuon` CLI — the only surfaces this plugin documents. Only `nuonco/nuon` is synced.
 
 ## How to Read Go Struct Tags
 

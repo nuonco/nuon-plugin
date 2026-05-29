@@ -21,7 +21,6 @@ jobs:
         id: detect
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NUON_MONO_PAT: ${{ secrets.NUON_MONO_PAT }}
         run: |
           OUTPUT=$(bash .maintainer/scripts/detect-changes.sh 2>/tmp/detect-stderr.txt)
           cat /tmp/detect-stderr.txt

@@ -6,7 +6,7 @@ Nuon enables software vendors to deploy and operate their applications in their 
 
 Key concepts:
 - **App**: A BYOC application defined by TOML configs (inputs, sandbox, components, actions)
-- **Component**: A deployable unit - one of: `helm_chart`, `terraform_module`, `docker_build`, `container_image`, `kubernetes_manifest`, `job`
+- **Component**: A deployable unit - one of: `helm_chart`, `terraform_module`, `docker_build`, `container_image`, `kubernetes_manifest`, `job`, `pulumi`
 - **Sandbox**: Base infrastructure (VPC, K8s cluster, networking) provisioned via Terraform
 - **Install**: A single-tenant deployment of an app in a customer's cloud account
 - **Inputs**: Customer-configurable values (domain, credentials, sizing)
@@ -59,7 +59,7 @@ my-app/
 
 Nuon TOML files use a **flat structure** at the top level. NO nested wrappers like `[component]`. The first line MUST be a type comment for the LSP.
 
-Valid first-line comments: `# helm`, `# terraform`, `# docker-build`, `# container-image`, `# kubernetes-manifest`, `# job`, `# inputs`, `# input`, `# input-group`, `# sandbox`, `# runner`, `# stack`, `# action`, `# metadata`, `# secrets`, `# secret`, `# permissions`, `# policies`, `# policy`, `# installer`, `# install`, `# break-glass`
+Valid first-line comments: `# helm`, `# terraform`, `# docker-build`, `# container-image`, `# kubernetes-manifest`, `# job`, `# pulumi`, `# inputs`, `# input`, `# input-group`, `# sandbox`, `# runner`, `# stack`, `# action`, `# metadata`, `# secrets`, `# secret`, `# permissions`, `# policies`, `# policy`, `# installer`, `# install`, `# break-glass`
 
 **Example helm_chart component** (CORRECT format):
 ```toml
@@ -110,6 +110,22 @@ directory = "aws-lambda/src/components/api"
 branch    = "main"
 ```
 
+**Example pulumi component** (CORRECT format):
+```toml
+# pulumi
+name    = "infra"
+type    = "pulumi"
+runtime = "nodejs"
+
+[connected_repo]
+repo      = "org/repo"
+directory = "infra/pulumi"
+branch    = "main"
+
+[config]
+"aws:region" = "{{ .nuon.install_stack.outputs.region }}"
+```
+
 Key rules:
 - Use `dependencies` NOT `depends_on`
 - Use `[values]` for inline Helm values, `[[values_file]]` for external YAML files
@@ -117,6 +133,7 @@ Key rules:
 - Dot-notation keys in `[values]` must be quoted: `"nested.key" = "value"`
 - `chart_name` is REQUIRED for helm_chart components
 - `terraform_version` is REQUIRED for terraform_module components
+- `runtime` is REQUIRED for pulumi components (`nodejs`, `python`, `go`, `dotnet`); use `[config]` for stack config and `[env_vars]` for env vars
 - All component types support `build_timeout` and `deploy_timeout` fields (duration strings, e.g. `"30m"`)
 - Helm chart components support `take_ownership = true` to adopt an existing Helm release without error
 - `kubernetes_manifest` components support kustomize as an alternative to inline manifests: set `[kustomize]` with `path`, optional `patches`, `enable_helm`, and `load_restrictor` fields
