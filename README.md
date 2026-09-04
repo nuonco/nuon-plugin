@@ -1,4 +1,4 @@
-# Nuon Claude Code Plugin
+# Nuon Claude Code Plugin (last updated June 2026, new ways for agentic use of Nuon are under active development)
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that makes Claude an expert at creating [Nuon](https://nuon.co) BYOC app configurations. Describe your application and infrastructure, and the plugin generates production-ready Nuon config files with correct TOML structure, Go template wiring, and dependency ordering.
 
